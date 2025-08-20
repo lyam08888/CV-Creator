@@ -6,18 +6,28 @@ import { initAIStudio } from './ai.js';
 import { initExport, openExportDialog } from './exporter.js';
 import { initState, pushHistory, newProject } from './state.js';
 import { log, error, getLogs, clearLogs, attachGlobalErrorHandler } from './log.js';
+import { runFullDOMDiagnostic } from './dom-checker.js';
 
 export function initApp(){
-  attachGlobalErrorHandler();
-  
-  log('app','Init start');
-  
-  // Check if DOM is ready
-  if (document.readyState === 'loading') {
-    log('app','DOM not ready, waiting...');
-    document.addEventListener('DOMContentLoaded', initApp);
-    return;
-  }
+  try {
+    attachGlobalErrorHandler();
+    
+    log('app','Init start');
+    
+    // Check if DOM is ready
+    if (document.readyState === 'loading') {
+      log('app','DOM not ready, waiting...');
+      document.addEventListener('DOMContentLoaded', initApp);
+      return;
+    }
+    
+    log('app', 'DOM ready, proceeding with initialization');
+    
+    // Run DOM diagnostic first
+    const domOk = runFullDOMDiagnostic();
+    if (!domOk) {
+      error('app', 'Critical DOM elements missing - initialization may fail');
+    }
   
   // Get all DOM elements with null checks
   const btnHamburger = document.getElementById('btnHamburger');
@@ -161,6 +171,21 @@ export function initApp(){
   bindEvent(btnRunDiag, 'click', runDiagnostics, 'btnRunDiag');
 
   log('app','Init done');
+  
+  } catch (err) {
+    console.error('[App] Critical initialization error:', err);
+    error('app', 'Critical initialization error', { 
+      message: err.message, 
+      stack: err.stack 
+    });
+    
+    // Try to show a user-friendly error message
+    const statusText = document.getElementById('statusText');
+    if (statusText) {
+      statusText.textContent = 'Erreur critique - Consultez les logs';
+      statusText.style.color = 'red';
+    }
+  }
 }
 
 function renderLogs(){

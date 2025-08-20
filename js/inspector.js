@@ -6,13 +6,97 @@ const $=id=>document.getElementById(id);
 
 
 export function initInspector(){
+  log('inspector', 'Initializing inspector');
+  
+  // Check if inspector panel exists
+  const inspectorPanel = document.getElementById('rightInspector');
+  if (!inspectorPanel) {
+    console.error('[Inspector] Inspector panel not found');
+    log('inspector', 'Inspector panel missing');
+    return;
+  }
+  
   const ids=['inpFont','inpFontSize','inpLineHeight','inpColor','inpBg','inpRadius','inpShadow','inpX','inpY','inpW','inpH'];
-  ids.forEach(id=>{ const el=document.getElementById(id); if(el){ el.addEventListener('input', inspectorApplyValue); } else { console.warn('[Inspector] missing input', id); } });
-  const bind=(id,fn)=>{ const el=document.getElementById(id); if(el){ el.addEventListener('click', fn); } else { console.warn('[Inspector] missing btn', id); } };
-  bind('btnDuplicate', ()=>{ const sel=getSel(); if(!sel) return; const c=sel.cloneNode(true); c.style.left=(parseInt(sel.style.left||'0')+16)+'px'; c.style.top=(parseInt(sel.style.top||'0')+16)+'px'; sel.parentElement.appendChild(c); import('./drag.js').then(m=> m.selectBlock(c)); saveToStorage(); pushHistory('Duplication bloc'); });
-  bind('btnDelete', ()=>{ const s=getSel(); if(!s) return; s.remove(); import('./drag.js').then(m=> m.selectBlock(null)); saveToStorage(); pushHistory('Suppression bloc'); });
-  bind('btnLock', ()=>{ const s=getSel(); if(!s) return; s.dataset.locked=s.dataset.locked==='1'?'0':'1'; s.style.pointerEvents = s.dataset.locked==='1'?'none':'auto'; saveToStorage(); });
-  bind('btnHide', ()=>{ const s=getSel(); if(!s) return; s.style.display = s.style.display==='none'?'block':'none'; saveToStorage(); });
+  const missingInputs = [];
+  
+  ids.forEach(id => { 
+    const el = document.getElementById(id); 
+    if(el) { 
+      el.addEventListener('input', inspectorApplyValue); 
+      log('inspector', `Bound input event for ${id}`);
+    } else { 
+      console.warn('[Inspector] missing input', id); 
+      missingInputs.push(id);
+    } 
+  });
+  
+  if (missingInputs.length > 0) {
+    log('inspector', 'Missing input elements', { missing: missingInputs });
+  }
+  
+  const bind = (id, fn) => { 
+    const el = document.getElementById(id); 
+    if(el) { 
+      el.addEventListener('click', fn); 
+      log('inspector', `Bound click event for ${id}`);
+    } else { 
+      console.warn('[Inspector] missing btn', id); 
+    } 
+  };
+  
+  bind('btnDuplicate', () => { 
+    const sel = getSel(); 
+    if(!sel) {
+      log('inspector', 'No block selected for duplication');
+      return;
+    }
+    const c = sel.cloneNode(true); 
+    c.style.left = (parseInt(sel.style.left||'0')+16)+'px'; 
+    c.style.top = (parseInt(sel.style.top||'0')+16)+'px'; 
+    sel.parentElement.appendChild(c); 
+    import('./drag.js').then(m => m.selectBlock(c)); 
+    saveToStorage(); 
+    pushHistory('Duplication bloc'); 
+    log('inspector', 'Block duplicated');
+  });
+  
+  bind('btnDelete', () => { 
+    const s = getSel(); 
+    if(!s) {
+      log('inspector', 'No block selected for deletion');
+      return;
+    }
+    s.remove(); 
+    import('./drag.js').then(m => m.selectBlock(null)); 
+    saveToStorage(); 
+    pushHistory('Suppression bloc'); 
+    log('inspector', 'Block deleted');
+  });
+  
+  bind('btnLock', () => { 
+    const s = getSel(); 
+    if(!s) {
+      log('inspector', 'No block selected for locking');
+      return;
+    }
+    s.dataset.locked = s.dataset.locked==='1'?'0':'1'; 
+    s.style.pointerEvents = s.dataset.locked==='1'?'none':'auto'; 
+    saveToStorage(); 
+    log('inspector', 'Block lock toggled', { locked: s.dataset.locked });
+  });
+  
+  bind('btnHide', () => { 
+    const s = getSel(); 
+    if(!s) {
+      log('inspector', 'No block selected for hiding');
+      return;
+    }
+    s.style.display = s.style.display==='none'?'block':'none'; 
+    saveToStorage(); 
+    log('inspector', 'Block visibility toggled', { hidden: s.style.display === 'none' });
+  });
+  
+  log('inspector', 'Inspector initialization complete');
 }
 
 export function refreshInspector(sel){
