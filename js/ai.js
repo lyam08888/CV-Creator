@@ -4,7 +4,7 @@ import { pushHistory } from './state.js';
 import { log, error } from './log.js';
 
 const $=id=>document.getElementById(id);
-const ENDPOINT = '/api/ia';
+const ENDPOINT = 'http://localhost:3000/api/ia';
 
 export function initAIStudio(){
   log('ai', 'Initializing AI Studio');

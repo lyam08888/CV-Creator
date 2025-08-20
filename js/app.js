@@ -1,4 +1,4 @@
-k// app.js
+// app.js
 import { createLibrary, addBlockToCanvas, THEMES, applyTheme, loadTemplateDialog } from './blocks.js';
 import { initDragAndResize, selectBlock, onCanvasClick } from './drag.js';
 import { initInspector, refreshInspector } from './inspector.js';

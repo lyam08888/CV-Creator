@@ -42,6 +42,14 @@ export function checkDOMElements() {
     { id: 'iaAction', critical: false, description: 'AI action select' },
     { id: 'iaScope', critical: false, description: 'AI scope select' },
     { id: 'btnRunIA', critical: false, description: 'Run AI button' },
+    { id: 'btnSaveSettings', critical: false, description: 'Save AI settings button' },
+    { id: 'aiKey', critical: false, description: 'AI API key input' },
+    { id: 'iaTone', critical: false, description: 'AI tone select' },
+    { id: 'iaLength', critical: false, description: 'AI length select' },
+    { id: 'iaLang', critical: false, description: 'AI language select' },
+    { id: 'iaKeywordsIn', critical: false, description: 'AI keywords include input' },
+    { id: 'iaKeywordsOut', critical: false, description: 'AI keywords exclude input' },
+    { id: 'iaPrompt', critical: false, description: 'AI prompt textarea' },
     
     // Dialogs
     { id: 'exportDialog', critical: false, description: 'Export dialog' },
