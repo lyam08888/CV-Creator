@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Fix</title>
+</head>
+<body>
+  <div id="test-results"></div>
+  
+  <script type="module">
+    // Test the fixes by simulating the problematic scenarios
+    
+    const results = [];
+    
+    // Test 1: Check if inspector elements exist
+    const inspectorElements = [
+      'inspectorSel', 'inpFont', 'inpFontSize', 'inpLineHeight', 
+      'inpColor', 'inpBg', 'inpRadius', 'inpShadow', 
+      'inpX', 'inpY', 'inpW', 'inpH'
+    ];
+    
+    inspectorElements.forEach(id => {
+      const el = document.getElementById(id);
+      results.push(`${id}: ${el ? '✅ Found' : '❌ Missing'}`);
+    });
+    
+    // Test 2: Check toolbar elements
+    const toolbarElements = [
+      'topToolbar', 'tbBold', 'tbItal', 'tbInc', 'tbDec',
+      'tbAlignL', 'tbAlignC', 'tbAlignR', 'tbAI'
+    ];
+    
+    toolbarElements.forEach(id => {
+      const el = document.getElementById(id);
+      results.push(`${id}: ${el ? '✅ Found' : '❌ Missing'}`);
+    });
+    
+    // Test 3: Check main app elements
+    const appElements = [
+      'btnHamburger', 'leftDrawer', 'cvPage', 'blockLibrary',
+      'themeList', 'btnExport', 'btnPreview', 'btnPublish'
+    ];
+    
+    appElements.forEach(id => {
+      const el = document.getElementById(id);
+      results.push(`${id}: ${el ? '✅ Found' : '❌ Missing'}`);
+    });
+    
+    // Display results
+    document.getElementById('test-results').innerHTML = 
+      '<h2>Element Check Results:</h2><pre>' + results.join('\n') + '</pre>';
+    
+    console.log('Test completed. Check results above.');
+  </script>
+</body>
+</html>

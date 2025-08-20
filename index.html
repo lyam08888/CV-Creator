@@ -213,10 +213,18 @@
 
   <script type="module">
     import { initApp } from './js/app.js';
+    
+    // Ensure DOM is fully loaded before initializing
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      // DOM is already loaded
+      initApp();
+    }
+    
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(console.error); });
     }
-    initApp();
   </script>
 </body>
 </html>

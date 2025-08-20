@@ -10,6 +10,15 @@ import { log, error, getLogs, clearLogs, attachGlobalErrorHandler } from './log.
 export function initApp(){
   attachGlobalErrorHandler();
   
+  log('app','Init start');
+  
+  // Check if DOM is ready
+  if (document.readyState === 'loading') {
+    log('app','DOM not ready, waiting...');
+    document.addEventListener('DOMContentLoaded', initApp);
+    return;
+  }
+  
   // Get all DOM elements with null checks
   const btnHamburger = document.getElementById('btnHamburger');
   const leftDrawer = document.getElementById('leftDrawer');
@@ -29,7 +38,17 @@ export function initApp(){
   const btnCopyLogs = document.getElementById('btnCopyLogs');
   const btnCloseLogs = document.getElementById('btnCloseLogs');
 
-  log('app','Init start');
+  // Check critical elements
+  const criticalElements = { cvPage, blockLibrary, leftDrawer };
+  const missingCritical = Object.entries(criticalElements)
+    .filter(([name, element]) => !element)
+    .map(([name]) => name);
+  
+  if (missingCritical.length > 0) {
+    console.error('[App] Critical elements missing:', missingCritical);
+    log('app', 'Critical elements missing', { missing: missingCritical });
+    return;
+  }
 
   // Helper function to safely bind events
   const bindEvent = (element, event, handler, elementName) => {
@@ -161,26 +180,36 @@ async function runDiagnostics(){
     // Canvas presence
     const page = document.getElementById('cvPage');
     assert('Canvas présent', !!page);
-    // Add block
-    const before = page.querySelectorAll('.drag-block').length;
-    const btnAdd = document.querySelector('#blockLibrary .btn');
-    if(btnAdd){ btnAdd.click(); }
-    const after = page.querySelectorAll('.drag-block').length;
-    assert('Ajout bloc via UI', after>before, { before, after });
-    // Drag simulation
-    const first = page.querySelector('.drag-block');
-    const x0 = parseInt(first.style.left||'0'); first.style.left = (x0+8)+'px';
-    assert('Déplacement programmatique', parseInt(first.style.left||'0')===x0+8, { from:x0, to: first.style.left });
-    // Preview toggle
-    document.body.classList.add('preview');
-    const pe = getComputedStyle(first).pointerEvents;
-    assert('Aperçu désactive interactions', pe==='none', { pointerEvents: pe });
-    document.body.classList.remove('preview');
+    
+    if(page) {
+      // Add block
+      const before = page.querySelectorAll('.drag-block').length;
+      const btnAdd = document.querySelector('#blockLibrary .btn');
+      if(btnAdd){ btnAdd.click(); }
+      const after = page.querySelectorAll('.drag-block').length;
+      assert('Ajout bloc via UI', after>before, { before, after });
+      
+      // Drag simulation
+      const first = page.querySelector('.drag-block');
+      if(first) {
+        const x0 = parseInt(first.style.left||'0'); 
+        first.style.left = (x0+8)+'px';
+        assert('Déplacement programmatique', parseInt(first.style.left||'0')===x0+8, { from:x0, to: first.style.left });
+        
+        // Preview toggle
+        document.body.classList.add('preview');
+        const pe = getComputedStyle(first).pointerEvents;
+        assert('Aperçu désactive interactions', pe==='none', { pointerEvents: pe });
+        document.body.classList.remove('preview');
+      }
+    }
+    
     // Export availability
     assert('html2canvas dispo', !!window.html2canvas);
     assert('jsPDF dispo', !!window.jspdf);
     // Local storage test
-    localStorage.setItem('cvpro_diag','ok'); assert('LocalStorage', localStorage.getItem('cvpro_diag')==='ok');
+    localStorage.setItem('cvpro_diag','ok'); 
+    assert('LocalStorage', localStorage.getItem('cvpro_diag')==='ok');
   }catch(e){
     console.error(e);
   }
@@ -188,5 +217,7 @@ async function runDiagnostics(){
   results.forEach(r => (r.ok? log('diag', r.name, r.details) : error('diag', r.name, r.details)));
   // Show summary
   const out = document.getElementById('logOutput');
-  out.textContent += '\n\nRésumé diagnostic:\n' + results.map(r=>`• ${r.ok?'✅':'❌'} ${r.name}`).join('\n');
+  if(out) {
+    out.textContent += '\n\nRésumé diagnostic:\n' + results.map(r=>`• ${r.ok?'✅':'❌'} ${r.name}`).join('\n');
+  }
 }
