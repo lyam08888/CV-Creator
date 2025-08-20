@@ -1,4 +1,4 @@
-// app.js
+k// app.js
 import { createLibrary, addBlockToCanvas, THEMES, applyTheme, loadTemplateDialog } from './blocks.js';
 import { initDragAndResize, selectBlock, onCanvasClick } from './drag.js';
 import { initInspector, refreshInspector } from './inspector.js';
@@ -115,7 +115,15 @@ export function initApp(){
     console.warn('[App] missing cvPage');
   }
 
-  initInspector(); initAIStudio(); initExport(); initState();
+  // Initialize components with DOM readiness check
+  const inspectorOk = initInspector();
+  if (!inspectorOk) {
+    error('app', 'Inspector initialization failed - some elements may be missing');
+  }
+  
+  initAIStudio(); 
+  initExport(); 
+  initState();
 
   bindEvent(btnExport, 'click', ()=> { openExportDialog(); log('ui','open export'); }, 'btnExport');
   bindEvent(btnPreview, 'click', ()=> { 

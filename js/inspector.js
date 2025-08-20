@@ -1,4 +1,4 @@
-// inspector.js
+o// inspector.js
 import { selectBlock } from './drag.js';
 import { saveToStorage, pushHistory } from './state.js';
 import { log } from './log.js';
