@@ -2,6 +2,7 @@
 import { selectBlock } from './drag.js';
 import { saveToStorage, pushHistory } from './state.js';
 import { log } from './log.js';
+import { notify } from './notifications.js';
 const $=id=>document.getElementById(id);
 
 
@@ -58,6 +59,7 @@ export function initInspector(){
     saveToStorage(); 
     pushHistory('Duplication bloc'); 
     log('inspector', 'Block duplicated');
+    notify.success('Bloc dupliqué');
   });
   
   bind('btnDelete', () => { 
@@ -71,6 +73,7 @@ export function initInspector(){
     saveToStorage(); 
     pushHistory('Suppression bloc'); 
     log('inspector', 'Block deleted');
+    notify.success('Bloc supprimé');
   });
   
   bind('btnLock', () => { 

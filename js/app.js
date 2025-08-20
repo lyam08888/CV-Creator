@@ -8,6 +8,7 @@ import { initState, pushHistory, newProject } from './state.js';
 import { log, error, getLogs, clearLogs, attachGlobalErrorHandler } from './log.js';
 import { runFullDOMDiagnostic } from './dom-checker.js';
 import './auto-fix.js';
+import { notify } from './notifications.js';
 
 export function initApp(){
   try {
@@ -28,6 +29,9 @@ export function initApp(){
     const domOk = runFullDOMDiagnostic();
     if (!domOk) {
       error('app', 'Critical DOM elements missing - initialization may fail');
+      notify.error('Éléments critiques manquants - certaines fonctionnalités peuvent ne pas marcher');
+    } else {
+      notify.success('Application initialisée avec succès');
     }
   
   // Get all DOM elements with null checks
@@ -170,6 +174,23 @@ export function initApp(){
     }
   }, 'btnCopyLogs');
   bindEvent(btnRunDiag, 'click', runDiagnostics, 'btnRunDiag');
+  
+  // Auto-Fix button
+  const btnAutoFix = document.getElementById('btnAutoFix');
+  bindEvent(btnAutoFix, 'click', async () => {
+    try {
+      if (typeof window.runAutoFix === 'function') {
+        const report = await window.runAutoFix();
+        log('app', 'Auto-fix completed', report.summary);
+      } else {
+        error('app', 'Auto-fix function not available');
+        alert('Fonction Auto-Fix non disponible');
+      }
+    } catch (err) {
+      error('app', 'Auto-fix error', { error: err.message });
+      alert('Erreur lors de l\'auto-fix: ' + err.message);
+    }
+  }, 'btnAutoFix');
 
   log('app','Init done');
   

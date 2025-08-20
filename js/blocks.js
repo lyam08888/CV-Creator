@@ -2,6 +2,7 @@
 import { saveToStorage } from './state.js';
 import { attachDragHandles } from './drag.js';
 import { log } from './log.js';
+import { notify } from './notifications.js';
 
 export const THEMES = [
   { name: 'LTd Bleu', vars: { '--accent':'#2563eb', '--muted':'#e2e8f0' }, bg:'#ffffff', text:'#0b1220' },
@@ -10,7 +11,16 @@ export const THEMES = [
 ];
 export function applyTheme(theme){
   for(const k in theme.vars){ document.documentElement.style.setProperty(k, theme.vars[k]); }
-  const page=document.getElementById('cvPage'); page.style.background=theme.bg; page.style.color=theme.text; saveToStorage(); log('theme','applied', theme);
+  const page=document.getElementById('cvPage'); 
+  if (page) {
+    page.style.background=theme.bg; 
+    page.style.color=theme.text; 
+    saveToStorage(); 
+    log('theme','applied', theme);
+    notify.success(`Thème "${theme.name}" appliqué`);
+  } else {
+    notify.error('Impossible d\'appliquer le thème - page canvas manquante');
+  }
 }
 
 const LIB = [
@@ -56,7 +66,9 @@ export function addBlockToCanvas(type, page){
   page.appendChild(el);
   attachDragHandles(el, page);
   if(type==='qr' && 'QRCode' in window){ const cont=el.querySelector('.qr-box'); cont.innerHTML=''; new window.QRCode(cont, { text: el.querySelector('[data-qr]').getAttribute('data-qr')||'https://example.com', width:96, height:96 }); }
-  saveToStorage(); log('block','added to canvas', { type, id: el.dataset.id });
+  saveToStorage(); 
+  log('block','added to canvas', { type, id: el.dataset.id });
+  notify.success(`Bloc "${type}" ajouté au CV`);
   return el;
 }
 
