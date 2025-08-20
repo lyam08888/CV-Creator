@@ -14,7 +14,7 @@ export function initInspector(){
   if (!inspectorPanel) {
     console.error('[Inspector] Inspector panel not found');
     log('inspector', 'Inspector panel missing');
-    return;
+    return false;
   }
   
   const ids=['inpFont','inpFontSize','inpLineHeight','inpColor','inpBg','inpRadius','inpShadow','inpX','inpY','inpW','inpH'];
@@ -33,6 +33,7 @@ export function initInspector(){
   
   if (missingInputs.length > 0) {
     log('inspector', 'Missing input elements', { missing: missingInputs });
+    // Don't fail initialization for missing inputs, just warn
   }
   
   const bind = (id, fn) => { 
@@ -100,6 +101,7 @@ export function initInspector(){
   });
   
   log('inspector', 'Inspector initialization complete');
+  return true;
 }
 
 export function refreshInspector(sel){
