@@ -50,6 +50,12 @@ export function checkDOMElements() {
     { id: 'iaKeywordsIn', critical: false, description: 'AI keywords include input' },
     { id: 'iaKeywordsOut', critical: false, description: 'AI keywords exclude input' },
     { id: 'iaPrompt', critical: false, description: 'AI prompt textarea' },
+    { id: 'cvCompleteSection', critical: false, description: 'CV complete form section' },
+    { id: 'cvName', critical: false, description: 'CV name input' },
+    { id: 'cvTitle', critical: false, description: 'CV title input' },
+    { id: 'cvExperience', critical: false, description: 'CV experience input' },
+    { id: 'cvSkills', critical: false, description: 'CV skills input' },
+    { id: 'cvBackground', critical: false, description: 'CV background textarea' },
     
     // Dialogs
     { id: 'exportDialog', critical: false, description: 'Export dialog' },

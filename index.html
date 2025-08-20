@@ -60,6 +60,7 @@
               <option value="lm">Lettre de motivation</option>
               <option value="translate">Traduire</option>
               <option value="tagline">Pitch LinkedIn</option>
+              <option value="complete_cv">🚀 Remplir CV complet</option>
             </select>
             <select id="iaScope" class="input">
               <option value="selection">Bloc sélectionné</option>
@@ -80,6 +81,16 @@
           <input id="iaKeywordsIn" class="input" placeholder="Inclure (comma)">
           <input id="iaKeywordsOut" class="input" placeholder="Exclure (comma)">
           <textarea id="iaPrompt" rows="4" class="input" placeholder="Consignes supplémentaires..."></textarea>
+          <details class="details" id="cvCompleteSection" style="display: none;">
+            <summary>Informations pour CV complet</summary>
+            <div class="space-y">
+              <input id="cvName" class="input" placeholder="Nom complet">
+              <input id="cvTitle" class="input" placeholder="Titre professionnel">
+              <input id="cvExperience" class="input" placeholder="Années d'expérience">
+              <input id="cvSkills" class="input" placeholder="Compétences principales (séparées par des virgules)">
+              <textarea id="cvBackground" rows="3" class="input" placeholder="Contexte professionnel et objectifs..."></textarea>
+            </div>
+          </details>
           <button id="btnRunIA" class="btn w-full">Lancer IA</button>
           <details class="details">
             <summary>API Key</summary>

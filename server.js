@@ -35,19 +35,27 @@ app.post('/api/ia', async (req, res) => {
 
     // Try to use OpenAI API (you can replace this with other AI services)
     try {
+      let systemPrompt = `Tu es un assistant spécialisé dans la rédaction de CV et lettres de motivation. Action demandée: ${action}. Consignes: ${prompt}`;
+      let userContent = text;
+      
+      if (action === 'complete_cv') {
+        systemPrompt = `Tu es un expert en rédaction de CV. Crée un CV complet et professionnel en français basé sur les informations fournies. Structure: Nom/Titre, Profil professionnel, Compétences clés, Expérience professionnelle détaillée, Formation, Langues, Centres d'intérêt. Utilise un ton professionnel et des verbes d'action. Inclus des KPI et résultats concrets. Consignes: ${prompt}`;
+        userContent = `Crée un CV complet avec ces informations: ${prompt}`;
+      }
+      
       const openaiResponse = await axios.post('https://api.openai.com/v1/chat/completions', {
         model: 'gpt-3.5-turbo',
         messages: [
           {
             role: 'system',
-            content: `Tu es un assistant spécialisé dans la rédaction de CV et lettres de motivation. Action demandée: ${action}. Consignes: ${prompt}`
+            content: systemPrompt
           },
           {
             role: 'user',
-            content: text
+            content: userContent
           }
         ],
-        max_tokens: 1000,
+        max_tokens: action === 'complete_cv' ? 2000 : 1000,
         temperature: 0.7
       }, {
         headers: {
@@ -82,6 +90,22 @@ app.post('/api/ia', async (req, res) => {
 function localHeuristic(action, prompt, text) {
   console.log('[AI API] Using local heuristic for action:', action);
   
+  if (action === 'complete_cv') { 
+    // Extract information from prompt
+    const nameMatch = prompt.match(/Nom:([^|]*)/i);
+    const titleMatch = prompt.match(/Titre:([^|]*)/i);
+    const expMatch = prompt.match(/Expérience:([^|]*)/i);
+    const skillsMatch = prompt.match(/Compétences:([^|]*)/i);
+    const contextMatch = prompt.match(/Contexte:([^|]*)/i);
+    
+    const name = nameMatch ? nameMatch[1].trim() : 'Prénom NOM';
+    const title = titleMatch ? titleMatch[1].trim() : 'Professionnel expérimenté';
+    const experience = expMatch ? expMatch[1].trim() : '5+ ans';
+    const skills = skillsMatch ? skillsMatch[1].trim() : 'Gestion de projet, Leadership, Communication';
+    const context = contextMatch ? contextMatch[1].trim() : 'Professionnel motivé avec une solide expérience';
+    
+    return generateCompleteCV(name, title, experience, skills, context);
+  }
   if (action === 'summarize') { 
     return text.split(/(?<=[.!?])\s+/).slice(0, 3).join(' '); 
   }
@@ -119,6 +143,37 @@ function localHeuristic(action, prompt, text) {
     return 'Chef de projet — 8+ ans, livraisons TCE, performance et qualité.'; 
   }
   return text;
+}
+
+function generateCompleteCV(name, title, experience, skills, context) {
+  const skillsArray = skills.split(',').map(s => s.trim());
+  
+  return `${name}
+${title}
+
+PROFIL PROFESSIONNEL
+${context} avec ${experience} d'expérience dans le domaine.
+
+COMPÉTENCES CLÉS
+${skillsArray.map(skill => `• ${skill}`).join('\n')}
+
+EXPÉRIENCE PROFESSIONNELLE
+${title} | Entreprise | ${new Date().getFullYear() - parseInt(experience) || 2020} - Présent
+• Pilotage de projets stratégiques avec impact mesurable
+• Management d'équipes et coordination transversale
+• Amélioration des processus et optimisation des performances
+• Résultats: +25% d'efficacité, satisfaction client 95%
+
+FORMATION
+Master/Diplôme d'ingénieur | École/Université | ${new Date().getFullYear() - 10}
+Spécialisation en management et gestion de projet
+
+LANGUES
+• Français: Langue maternelle
+• Anglais: Courant (C1)
+
+CENTRES D'INTÉRÊT
+Innovation technologique, Management, Développement durable`;
 }
 
 // Serve the main HTML file

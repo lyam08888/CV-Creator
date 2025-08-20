@@ -4,13 +4,26 @@ import { pushHistory } from './state.js';
 import { log, error } from './log.js';
 
 const $=id=>document.getElementById(id);
-const ENDPOINT = 'http://localhost:3000/api/ia';
+const ENDPOINT = '/api/ia';
 
 export function initAIStudio(){
   log('ai', 'Initializing AI Studio');
   
   const btnSaveSettings = $('#btnSaveSettings');
   const btnRunIA = $('#btnRunIA');
+  const iaAction = $('#iaAction');
+  const cvCompleteSection = $('#cvCompleteSection');
+  
+  // Show/hide CV complete form based on action selection
+  if (iaAction && cvCompleteSection) {
+    iaAction.addEventListener('change', () => {
+      if (iaAction.value === 'complete_cv') {
+        cvCompleteSection.style.display = 'block';
+      } else {
+        cvCompleteSection.style.display = 'none';
+      }
+    });
+  }
   
   if (btnSaveSettings) {
     btnSaveSettings.addEventListener('click', saveAPIKey);
@@ -68,6 +81,18 @@ function buildPrompt(){
   const kout = $('#iaKeywordsOut')?.value || '';
   const extra = $('#iaPrompt')?.value || '';
   
+  // Add CV complete information if available
+  const action = $('#iaAction')?.value;
+  if (action === 'complete_cv') {
+    const name = $('#cvName')?.value || '';
+    const title = $('#cvTitle')?.value || '';
+    const experience = $('#cvExperience')?.value || '';
+    const skills = $('#cvSkills')?.value || '';
+    const background = $('#cvBackground')?.value || '';
+    
+    return `Ton:${tone||'professionnel'} | Longueur:${len||'complet'} | Lang:${lang||'fr'} | Nom:${name} | Titre:${title} | Expérience:${experience} | Compétences:${skills} | Contexte:${background} | Inclure:${kin} | Exclure:${kout} | Consignes:${extra}`;
+  }
+  
   return `Ton:${tone||'par défaut'} | Longueur:${len||'par défaut'} | Lang:${lang||'auto'} | Inclure:${kin} | Exclure:${kout} | Consignes:${extra}`;
 }
 function saveAPIKey(){ 
@@ -99,6 +124,22 @@ async function runAI(action, prompt, text){
 }
 
 function localHeuristic(action, prompt, text){
+  if(action==='complete_cv'){ 
+    // Extract information from prompt
+    const nameMatch = prompt.match(/Nom:([^|]*)/i);
+    const titleMatch = prompt.match(/Titre:([^|]*)/i);
+    const expMatch = prompt.match(/Expérience:([^|]*)/i);
+    const skillsMatch = prompt.match(/Compétences:([^|]*)/i);
+    const contextMatch = prompt.match(/Contexte:([^|]*)/i);
+    
+    const name = nameMatch ? nameMatch[1].trim() : 'Prénom NOM';
+    const title = titleMatch ? titleMatch[1].trim() : 'Professionnel expérimenté';
+    const experience = expMatch ? expMatch[1].trim() : '5+ ans';
+    const skills = skillsMatch ? skillsMatch[1].trim() : 'Gestion de projet, Leadership, Communication';
+    const context = contextMatch ? contextMatch[1].trim() : 'Professionnel motivé avec une solide expérience';
+    
+    return generateCompleteCV(name, title, experience, skills, context);
+  }
   if(action==='summarize'){ return text.split(/(?<=[.!?])\s+/).slice(0,3).join(' '); }
   if(action==='expand'){ return text + '\n\nDétails: contexte, actions, résultats (KPI).'; }
   if(action==='bulletify'){ return text.split(/[\n\.]/).map(t=>t.trim()).filter(Boolean).slice(0,8).map(x=>'• '+x[0].toUpperCase()+x.slice(1)).join('\n'); }
@@ -115,4 +156,35 @@ function localHeuristic(action, prompt, text){
   if(action==='translate'){ if(/\b(en)\b/i.test(prompt)) return '[EN] '+text; return '[FR] '+text; }
   if(action==='tagline'){ return 'Chef de projet — 8+ ans, livraisons TCE, performance et qualité.'; }
   return text;
+}
+
+function generateCompleteCV(name, title, experience, skills, context) {
+  const skillsArray = skills.split(',').map(s => s.trim());
+  
+  return `${name}
+${title}
+
+PROFIL PROFESSIONNEL
+${context} avec ${experience} d'expérience dans le domaine.
+
+COMPÉTENCES CLÉS
+${skillsArray.map(skill => `• ${skill}`).join('\n')}
+
+EXPÉRIENCE PROFESSIONNELLE
+${title} | Entreprise | ${new Date().getFullYear() - parseInt(experience) || 2020} - Présent
+• Pilotage de projets stratégiques avec impact mesurable
+• Management d'équipes et coordination transversale
+• Amélioration des processus et optimisation des performances
+• Résultats: +25% d'efficacité, satisfaction client 95%
+
+FORMATION
+Master/Diplôme d'ingénieur | École/Université | ${new Date().getFullYear() - 10}
+Spécialisation en management et gestion de projet
+
+LANGUES
+• Français: Langue maternelle
+• Anglais: Courant (C1)
+
+CENTRES D'INTÉRÊT
+Innovation technologique, Management, Développement durable`;
 }
