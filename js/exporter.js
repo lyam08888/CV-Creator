@@ -4,34 +4,97 @@ import { log, error } from './log.js';
 const $=id=>document.getElementById(id);
 
 export function initExport(){
-  $('#btnExport').addEventListener('click', openExportDialog);
-  $('#btnCloseExport').addEventListener('click', ()=> $('#exportDialog').close());
-  $('#btnExportPNG').addEventListener('click', exportPNG);
-  $('#btnExportPDF').addEventListener('click', exportPDF);
-  $('#btnExportSVG').addEventListener('click', exportSVG);
-  $('#btnExportDOCX').addEventListener('click', exportDOCX);
-  $('#btnExportJSON').addEventListener('click', exportJSON);
-  $('#btnPrint').addEventListener('click', ()=> window.print());
+  log('export', 'Initializing export module');
+  
+  const bindExportButton = (id, handler, description) => {
+    const element = $(id);
+    if (element) {
+      element.addEventListener('click', handler);
+      log('export', `Bound ${description} button`);
+    } else {
+      console.warn(`[Export] Missing element: ${id}`);
+    }
+  };
+  
+  bindExportButton('btnExport', openExportDialog, 'main export');
+  bindExportButton('btnCloseExport', () => {
+    const dialog = $('#exportDialog');
+    if (dialog) dialog.close();
+  }, 'close export');
+  bindExportButton('btnExportPNG', exportPNG, 'PNG export');
+  bindExportButton('btnExportPDF', exportPDF, 'PDF export');
+  bindExportButton('btnExportSVG', exportSVG, 'SVG export');
+  bindExportButton('btnExportDOCX', exportDOCX, 'DOCX export');
+  bindExportButton('btnExportJSON', exportJSON, 'JSON export');
+  bindExportButton('btnPrint', () => window.print(), 'print');
+  
+  log('export', 'Export module initialization complete');
 }
-export function openExportDialog(){ $('#exportDialog').showModal(); log('export','open'); }
+export function openExportDialog(){ 
+  const dialog = $('#exportDialog');
+  if (dialog) {
+    dialog.showModal(); 
+    log('export','open'); 
+  } else {
+    error('export', 'Export dialog not found');
+    alert('Erreur: dialogue d\'export introuvable');
+  }
+}
 async function exportPNG(){
   try{
-    const page=document.getElementById('cvPage');
-    const canvas=await html2canvas(page,{scale:2});
-    const link=document.createElement('a'); link.download='cv.png'; link.href=canvas.toDataURL('image/png'); link.click();
+    if (!window.html2canvas) {
+      error('export', 'html2canvas not loaded');
+      alert('Erreur: html2canvas non disponible');
+      return;
+    }
+    
+    const page = document.getElementById('cvPage');
+    if (!page) {
+      error('export', 'Canvas page not found');
+      alert('Erreur: page canvas introuvable');
+      return;
+    }
+    
+    log('export', 'Starting PNG export');
+    const canvas = await html2canvas(page, {scale:2});
+    const link = document.createElement('a'); 
+    link.download = 'cv.png'; 
+    link.href = canvas.toDataURL('image/png'); 
+    link.click();
     log('export','png ok');
-  }catch(e){ error('export','png fail', { e:String(e) }); }
+    alert('Export PNG terminé');
+  }catch(e){ 
+    error('export','png fail', { e:String(e) }); 
+    alert('Erreur lors de l\'export PNG: ' + e.message);
+  }
 }
 async function exportPDF(){
   try{
-    const page=document.getElementById('cvPage');
+    if (!window.jspdf || !window.html2canvas) {
+      error('export', 'PDF dependencies not loaded');
+      alert('Erreur: dépendances PDF non disponibles');
+      return;
+    }
+    
+    const page = document.getElementById('cvPage');
+    if (!page) {
+      error('export', 'Canvas page not found');
+      alert('Erreur: page canvas introuvable');
+      return;
+    }
+    
+    log('export', 'Starting PDF export');
     const { jsPDF } = window.jspdf;
-    const pdf=new jsPDF('p','mm','a4');
-    const canvas=await html2canvas(page,{scale:2});
+    const pdf = new jsPDF('p','mm','a4');
+    const canvas = await html2canvas(page, {scale:2});
     pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,210,297);
     pdf.save('cv.pdf');
     log('export','pdf ok');
-  }catch(e){ error('export','pdf fail', { e:String(e) }); }
+    alert('Export PDF terminé');
+  }catch(e){ 
+    error('export','pdf fail', { e:String(e) }); 
+    alert('Erreur lors de l\'export PDF: ' + e.message);
+  }
 }
 function exportJSON(){
   try{

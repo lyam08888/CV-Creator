@@ -7,24 +7,80 @@ const $=id=>document.getElementById(id);
 const ENDPOINT = '/api/ia';
 
 export function initAIStudio(){
-  $('#btnSaveSettings').addEventListener('click', saveAPIKey);
-  $('#btnRunIA').addEventListener('click', async ()=>{
-    const action=$('#iaAction').value;
-    const scope=$('#iaScope').value;
-    const prompt=buildPrompt();
-    const { text, targets } = getTextFromScope(scope);
-    log('ai','run', { action, scope, textLen: text.length });
-    const output = await runAI(action, prompt, text);
-    setTextToScope(targets, output);
-    pushHistory('IA: '+action);
-  });
+  log('ai', 'Initializing AI Studio');
+  
+  const btnSaveSettings = $('#btnSaveSettings');
+  const btnRunIA = $('#btnRunIA');
+  
+  if (btnSaveSettings) {
+    btnSaveSettings.addEventListener('click', saveAPIKey);
+    log('ai', 'Bound save settings button');
+  } else {
+    console.warn('[AI] Missing btnSaveSettings element');
+  }
+  
+  if (btnRunIA) {
+    btnRunIA.addEventListener('click', async ()=>{
+      try {
+        const iaAction = $('#iaAction');
+        const iaScope = $('#iaScope');
+        
+        if (!iaAction || !iaScope) {
+          error('ai', 'Missing AI form elements');
+          alert('Erreur: éléments de formulaire IA manquants');
+          return;
+        }
+        
+        const action = iaAction.value;
+        const scope = iaScope.value;
+        const prompt = buildPrompt();
+        const { text, targets } = getTextFromScope(scope);
+        
+        log('ai','run', { action, scope, textLen: text.length });
+        
+        if (!text || text.trim().length === 0) {
+          alert('Aucun texte sélectionné pour traitement IA');
+          return;
+        }
+        
+        const output = await runAI(action, prompt, text);
+        setTextToScope(targets, output);
+        pushHistory('IA: '+action);
+        
+        log('ai', 'AI processing complete');
+      } catch (err) {
+        error('ai', 'AI processing error', { error: err.message });
+        alert('Erreur lors du traitement IA: ' + err.message);
+      }
+    });
+    log('ai', 'Bound run AI button');
+  } else {
+    console.warn('[AI] Missing btnRunIA element');
+  }
+  
+  log('ai', 'AI Studio initialization complete');
 }
 function buildPrompt(){
-  const tone=$('#iaTone').value, len=$('#iaLength').value, lang=$('#iaLang').value;
-  const kin=$('#iaKeywordsIn').value, kout=$('#iaKeywordsOut').value, extra=$('#iaPrompt').value;
+  const tone = $('#iaTone')?.value || '';
+  const len = $('#iaLength')?.value || '';
+  const lang = $('#iaLang')?.value || '';
+  const kin = $('#iaKeywordsIn')?.value || '';
+  const kout = $('#iaKeywordsOut')?.value || '';
+  const extra = $('#iaPrompt')?.value || '';
+  
   return `Ton:${tone||'par défaut'} | Longueur:${len||'par défaut'} | Lang:${lang||'auto'} | Inclure:${kin} | Exclure:${kout} | Consignes:${extra}`;
 }
-function saveAPIKey(){ localStorage.setItem('cvpro_api_key', $('#aiKey').value.trim()); log('ai','api key saved'); alert('API key sauvegardée.'); }
+function saveAPIKey(){ 
+  const aiKeyElement = $('#aiKey');
+  if (aiKeyElement) {
+    localStorage.setItem('cvpro_api_key', aiKeyElement.value.trim()); 
+    log('ai','api key saved'); 
+    alert('API key sauvegardée.');
+  } else {
+    error('ai', 'Cannot save API key - input element missing');
+    alert('Erreur: impossible de sauvegarder la clé API');
+  }
+}
 function getAPIKey(){ return localStorage.getItem('cvpro_api_key')||''; }
 
 async function runAI(action, prompt, text){

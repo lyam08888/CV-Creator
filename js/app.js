@@ -7,6 +7,7 @@ import { initExport, openExportDialog } from './exporter.js';
 import { initState, pushHistory, newProject } from './state.js';
 import { log, error, getLogs, clearLogs, attachGlobalErrorHandler } from './log.js';
 import { runFullDOMDiagnostic } from './dom-checker.js';
+import './auto-fix.js';
 
 export function initApp(){
   try {

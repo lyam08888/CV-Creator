@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test CV Creator Functionality</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+    .success { background-color: #d4edda; border-color: #c3e6cb; }
+    .error { background-color: #f8d7da; border-color: #f5c6cb; }
+    .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+    button { margin: 5px; padding: 8px 16px; }
+    #results { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🔧 Test CV Creator Functionality</h1>
+  
+  <div class="test-section">
+    <h2>Tests automatiques</h2>
+    <button onclick="runAllTests()">🚀 Lancer tous les tests</button>
+    <button onclick="testDOMElements()">🔍 Test éléments DOM</button>
+    <button onclick="testJavaScriptModules()">📦 Test modules JS</button>
+    <button onclick="testExternalLibraries()">🌐 Test bibliothèques externes</button>
+  </div>
+  
+  <div class="test-section">
+    <h2>Tests manuels</h2>
+    <button onclick="openMainApp()">🎯 Ouvrir l'application principale</button>
+    <button onclick="testLocalStorage()">💾 Test LocalStorage</button>
+  </div>
+  
+  <div id="results"></div>
+
+  <script>
+    const results = document.getElementById('results');
+    
+    function addResult(title, status, details = '') {
+      const div = document.createElement('div');
+      div.className = `test-section ${status}`;
+      div.innerHTML = `
+        <h3>${status === 'success' ? '✅' : status === 'error' ? '❌' : '⚠️'} ${title}</h3>
+        ${details ? `<p>${details}</p>` : ''}
+      `;
+      results.appendChild(div);
+    }
+    
+    function testDOMElements() {
+      addResult('Test éléments DOM', 'warning', 'Ce test nécessite que l\'application principale soit chargée');
+    }
+    
+    function testJavaScriptModules() {
+      const modules = [
+        './js/app.js',
+        './js/blocks.js', 
+        './js/drag.js',
+        './js/inspector.js',
+        './js/ai.js',
+        './js/exporter.js',
+        './js/state.js',
+        './js/log.js',
+        './js/domutil.js',
+        './js/dom-checker.js',
+        './js/error_handler.js'
+      ];
+      
+      let loadedCount = 0;
+      let errorCount = 0;
+      
+      modules.forEach(async (module) => {
+        try {
+          await import(module);
+          loadedCount++;
+          if (loadedCount + errorCount === modules.length) {
+            addResult(`Modules JavaScript (${loadedCount}/${modules.length})`, 
+              errorCount === 0 ? 'success' : 'warning', 
+              errorCount > 0 ? `${errorCount} modules ont échoué` : 'Tous les modules chargés avec succès');
+          }
+        } catch (e) {
+          errorCount++;
+          console.error(`Failed to load ${module}:`, e);
+          if (loadedCount + errorCount === modules.length) {
+            addResult(`Modules JavaScript (${loadedCount}/${modules.length})`, 
+              errorCount === 0 ? 'success' : 'warning', 
+              `${errorCount} modules ont échoué: ${e.message}`);
+          }
+        }
+      });
+    }
+    
+    function testExternalLibraries() {
+      const libs = [
+        { name: 'html2canvas', check: () => window.html2canvas },
+        { name: 'jsPDF', check: () => window.jspdf },
+        { name: 'QRCode', check: () => window.QRCode }
+      ];
+      
+      let available = 0;
+      let missing = [];
+      
+      libs.forEach(lib => {
+        if (lib.check()) {
+          available++;
+        } else {
+          missing.push(lib.name);
+        }
+      });
+      
+      addResult(`Bibliothèques externes (${available}/${libs.length})`, 
+        missing.length === 0 ? 'success' : 'warning',
+        missing.length > 0 ? `Manquantes: ${missing.join(', ')}` : 'Toutes les bibliothèques sont disponibles');
+    }
+    
+    function testLocalStorage() {
+      try {
+        localStorage.setItem('cvpro_test', 'ok');
+        const test = localStorage.getItem('cvpro_test');
+        localStorage.removeItem('cvpro_test');
+        
+        if (test === 'ok') {
+          addResult('LocalStorage', 'success', 'Fonctionnel');
+        } else {
+          addResult('LocalStorage', 'error', 'Test échoué');
+        }
+      } catch (e) {
+        addResult('LocalStorage', 'error', `Erreur: ${e.message}`);
+      }
+    }
+    
+    function openMainApp() {
+      window.open('./index.html', '_blank');
+    }
+    
+    function runAllTests() {
+      results.innerHTML = '';
+      addResult('Tests en cours...', 'warning', 'Exécution des tests automatiques');
+      
+      setTimeout(() => {
+        testJavaScriptModules();
+        testExternalLibraries();
+        testLocalStorage();
+      }, 100);
+    }
+    
+    // Auto-run basic tests on load
+    window.addEventListener('load', () => {
+      setTimeout(runAllTests, 500);
+    });
+  </script>
+</body>
+</html>
