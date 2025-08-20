@@ -1,0 +1,59 @@
+
+:root{ --accent:#2563eb; --muted:#94a3b8; --bg:#0f172a; --hud:rgba(15,23,42,.7); --grid:rgba(2,6,23,.06); }
+*{box-sizing:border-box} html,body{height:100%} body{margin:0;background:#0f1221;color:#e5e7eb;font-family:Inter,system-ui,Arial,sans-serif}
+.container{max-width:1600px;margin:0 auto;padding:0 16px}
+.app-header{position:fixed;top:0;left:0;right:0;z-index:40;background:rgba(15,23,42,.7);backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,.1)}
+.header-inner{display:flex;align-items:center;gap:12px;padding:12px 0}
+.title-wrap{display:flex;align-items:center;gap:8px}
+.logo{width:24px;height:24px}
+.title{font-size:16px;font-weight:600;margin:0;outline:none}
+.actions{margin-left:auto;display:flex;gap:8px}
+.btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:6px 10px;border-radius:10px;font-size:12px;color:#e5e7eb}
+.btn:hover{background:rgba(255,255,255,.14)}
+.w-full{width:100%}
+.hidden{display:none}
+.row{display:flex;align-items:center}
+.row.between{justify-content:space-between}
+.row.gap{gap:8px}
+.space-y > * + *{margin-top:10px}
+.h3{font-size:18px;margin:0 0 6px 0}
+.label{display:block;margin:0 0 4px 0}
+.input{width:100%;background:#fff;color:#0b1220;border-radius:8px;border:1px solid #e5e7eb;padding:6px 8px}
+.muted{color:rgba(255,255,255,.7)} .small{font-size:12px}
+.sep{border-color:rgba(255,255,255,.1)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.theme-list{display:flex;flex-wrap:wrap;gap:8px}
+.panel{background:var(--hud);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:12px}
+.drawer{position:fixed;top:56px;bottom:0;left:0;width:320px;transform:translateX(-100%);transition:transform .25s ease;z-index:30;padding:12px;overflow:auto}
+.drawer.open{transform:translateX(0)}
+.inspector{position:fixed;top:56px;bottom:0;right:0;width:360px;z-index:30;padding:12px;overflow:auto}
+.toolbar.floating{position:fixed;z-index:60;background:var(--hud);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:6px;display:flex;gap:6px;align-items:center}
+.statusbar{position:fixed;bottom:0;left:0;right:0;z-index:40;background:rgba(15,23,42,.7);backdrop-filter:blur(6px);border-top:1px solid rgba(255,255,255,.1);font-size:12px}
+.main{padding-top:56px}
+.canvas-scroll{height:calc(100vh - 56px - 32px);overflow:auto;padding:16px 0}
+.page{width:210mm;height:297mm;background:white;color:#0b1220;position:relative;box-shadow:0 10px 30px rgba(0,0,0,.35);border-radius:12px;overflow:hidden;transform-origin:top left}
+.page-grid{background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size:8px 8px,8px 8px}
+.drag-block{position:absolute;user-select:text;background:transparent;outline:1px dashed transparent;border-radius:10px;cursor:grab}
+.drag-block.dragging{cursor:grabbing}
+.drag-block.selected{outline:1px dashed var(--accent)}
+.block-content{padding:8px}
+.handle{width:10px;height:10px;border-radius:999px;background:var(--accent);position:absolute;display:none}
+.drag-block.selected .handle{display:block}
+.handle.br{right:-6px;bottom:-6px;cursor:se-resize}.handle.tr{right:-6px;top:-6px;cursor:ne-resize}.handle.bl{left:-6px;bottom:-6px;cursor:sw-resize}.handle.tl{left:-6px;top:-6px;cursor:nw-resize}
+.tag{display:inline-block;background:#e2e8f0;color:#0b1220;padding:2px 8px;border-radius:999px;font-size:12px;margin:2px}
+.card{background:#ffffff;color:#0b1220;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,.08)}
+.details{font-size:12px}
+dialog{max-width:800px}
+/* Preview mode: disable interactions for safe viewing */
+.preview #cvPage .drag-block{pointer-events:none}
+.preview #cvPage .handle{display:none}
+.preview .page.page-grid{background:none}
+@media print{
+  @page{size:A4 portrait;margin:12mm}
+  body{background:white}
+  #appHeader,#leftDrawer,#rightInspector,#topToolbar,#statusBar{display:none!important}
+  .page{box-shadow:none!important}
+}

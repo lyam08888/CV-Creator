@@ -1,0 +1,122 @@
+{
+  "templates": [
+    {
+      "name": "Deux colonnes — Classique",
+      "blocks": [
+        {
+          "id": "b1",
+          "type": "header",
+          "html": "<div class='block-content'><div style='display:flex; gap:16px; align-items:center;'><div style='width:72px; height:72px; border-radius:999px; background:#e2e8f0;'></div><div><div style='font-size:28px;font-weight:800;'>Prénom NOM</div><div style='opacity:.75;'>Chef de projet</div><div style='opacity:.75;font-size:12px;'>📧 email@ex.com · 📞 06 00 00 00 00 · 🌍 Ville</div></div></div></div>",
+          "layout": {
+            "x": 24,
+            "y": 24,
+            "w": 780,
+            "h": 120
+          },
+          "style": {
+            "radius": 10,
+            "bg": "#ffffff",
+            "shadow": "0 4px 10px rgba(0,0,0,.12)",
+            "font": "Inter, system-ui, Arial",
+            "lineHeight": "1.2"
+          }
+        },
+        {
+          "id": "b2",
+          "type": "summary",
+          "html": "<div class='block-content'><strong>Accroche</strong> — 8+ ans, livraisons TCE, management, KPI.</div>",
+          "layout": {
+            "x": 24,
+            "y": 160,
+            "w": 500,
+            "h": 120
+          },
+          "style": {
+            "radius": 10,
+            "bg": "#ffffff"
+          }
+        },
+        {
+          "id": "b3",
+          "type": "skills",
+          "html": "<div class='block-content'><strong>Compétences</strong><br><span class='tag'>AutoCAD</span><span class='tag'>MS Project</span><span class='tag'>BIM</span></div>",
+          "layout": {
+            "x": 24,
+            "y": 292,
+            "w": 500,
+            "h": 120
+          },
+          "style": {
+            "radius": 10,
+            "bg": "#ffffff"
+          }
+        },
+        {
+          "id": "b4",
+          "type": "experience",
+          "html": "<div class='block-content'><strong>Expériences</strong><ul><li><b>Chef de projet — EPDC</b> (2021–2025) — Pilotage de 15 ZAC, budget 8 M€.</li><li><b>MOEX — OTEIS</b> (2017–2021) — OPC, coordination lots techniques.</li></ul></div>",
+          "layout": {
+            "x": 540,
+            "y": 160,
+            "w": 264,
+            "h": 280
+          },
+          "style": {
+            "radius": 10,
+            "bg": "#ffffff"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Timeline — Pro",
+      "blocks": [
+        {
+          "id": "b1",
+          "type": "header",
+          "html": "<div class='block-content'><div style='display:flex; gap:16px; align-items:center;'><div style='width:72px; height:72px; border-radius:999px; background:#e2e8f0;'></div><div><div style='font-size:28px;font-weight:800;'>Prénom NOM</div><div style='opacity:.75;'>Ingénieur VRD</div><div style='opacity:.75;font-size:12px;'>📧 email@ex.com · 📞 06 00 00 00 00 · 🌍 Paris</div></div></div></div>",
+          "layout": {
+            "x": 24,
+            "y": 24,
+            "w": 780,
+            "h": 120
+          },
+          "style": {
+            "radius": 10,
+            "bg": "#ffffff"
+          }
+        },
+        {
+          "id": "b2",
+          "type": "summary",
+          "html": "<div class='block-content'><strong>Résumé</strong> — Management chantiers, MOE/MOA, BHNS.</div>",
+          "layout": {
+            "x": 24,
+            "y": 160,
+            "w": 780,
+            "h": 100
+          },
+          "style": {
+            "radius": 10,
+            "bg": "#ffffff"
+          }
+        },
+        {
+          "id": "b3",
+          "type": "qr",
+          "html": "<div class='block-content' data-qr='https://portfolio.example.com'><div class='qr-box' style='width:96px;height:96px;'></div><div>Portfolio</div></div>",
+          "layout": {
+            "x": 680,
+            "y": 268,
+            "w": 120,
+            "h": 120
+          },
+          "style": {
+            "radius": 10,
+            "bg": "#ffffff"
+          }
+        }
+      ]
+    }
+  ]
+}

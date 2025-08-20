@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV Pro — IA Studio (FULL+Logs)</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="./assets/favicon.svg">
+  <link rel="stylesheet" href="./css/app.css">
+  <!-- QRCode -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- html2canvas & jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <header id="appHeader" class="app-header">
+    <div class="container header-inner">
+      <button id="btnHamburger" class="btn">☰ Menu</button>
+      <div class="title-wrap">
+        <img src="./assets/favicon.svg" class="logo" alt="logo">
+        <h1 id="docTitle" class="title" contenteditable="true">Mon projet CV</h1>
+      </div>
+      <div class="actions">
+        <button id="btnTemplates" class="btn">Templates</button>
+        <button id="btnPreview" class="btn" title="Basculer Aperçu (désactive le drag)">Aperçu</button>
+        <button id="btnExport" class="btn">Exporter</button>
+        <button id="btnLogs" class="btn">Logs</button>
+        <button id="btnPublish" class="btn">Publier</button>
+      </div>
+    </div>
+  </header>
+
+  <aside id="leftDrawer" class="drawer">
+    <div class="panel p-3 space-y">
+      <div>
+        <h3 class="h3">Bibliothèque de blocs</h3>
+        <div id="blockLibrary" class="lib-grid"></div>
+      </div>
+      <hr class="sep">
+      <div>
+        <h3 class="h3">Styles & Thèmes</h3>
+        <div id="themeList" class="theme-list"></div>
+      </div>
+      <hr class="sep">
+      <div>
+        <h3 class="h3">IA Studio</h3>
+        <div class="space-y">
+          <div class="grid-2">
+            <select id="iaAction" class="input">
+              <option value="rewrite">Réécrire</option>
+              <option value="summarize">Synthétiser</option>
+              <option value="expand">Développer</option>
+              <option value="bulletify">Puces d'impact</option>
+              <option value="achievements">Réalisations</option>
+              <option value="ats">Optimisation ATS</option>
+              <option value="email">Générer Email</option>
+              <option value="lm">Lettre de motivation</option>
+              <option value="translate">Traduire</option>
+              <option value="tagline">Pitch LinkedIn</option>
+            </select>
+            <select id="iaScope" class="input">
+              <option value="selection">Bloc sélectionné</option>
+              <option value="page">Toute la page</option>
+            </select>
+          </div>
+          <div class="grid-3">
+            <select id="iaTone" class="input">
+              <option value="">Ton</option><option>sobre</option><option>impactant</option><option>technique</option><option>académique</option><option>executive</option>
+            </select>
+            <select id="iaLength" class="input">
+              <option value="">Longueur</option><option>très court</option><option>court</option><option>moyen</option><option>long</option>
+            </select>
+            <select id="iaLang" class="input">
+              <option value="">Lang</option><option>fr</option><option>en</option><option>auto</option>
+            </select>
+          </div>
+          <input id="iaKeywordsIn" class="input" placeholder="Inclure (comma)">
+          <input id="iaKeywordsOut" class="input" placeholder="Exclure (comma)">
+          <textarea id="iaPrompt" rows="4" class="input" placeholder="Consignes supplémentaires..."></textarea>
+          <button id="btnRunIA" class="btn w-full">Lancer IA</button>
+          <details class="details">
+            <summary>API Key</summary>
+            <input id="aiKey" type="password" class="input" placeholder="Saisir votre API Key">
+            <button id="btnSaveSettings" class="btn w-full">Sauvegarder</button>
+            <p class="help">Envoi vers <code>/api/ia</code> → <code>{ output }</code>.</p>
+          </details>
+        </div>
+      </div>
+      <hr class="sep">
+      <div>
+        <h3 class="h3">Historique & Versions</h3>
+        <div id="historyList" class="history"></div>
+      </div>
+      <hr class="sep">
+      <div>
+        <h3 class="h3">Import/Export</h3>
+        <div class="space-y">
+          <button id="btnImportJSON" class="btn">Importer JSON</button>
+          <input type="file" id="fileImportJSON" accept=".json" class="hidden"/>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <aside id="rightInspector" class="inspector">
+    <div class="panel p-3">
+      <div class="row between">
+        <h3 class="h3">Inspecteur</h3>
+        <div class="muted" id="inspectorSel">Aucun bloc</div>
+      </div>
+      <div class="space-y">
+        <div>
+          <label class="label">Police</label>
+          <select id="inpFont" class="input">
+            <option value="Inter, system-ui, Arial">Inter</option>
+            <option value="system-ui, Arial">System UI</option>
+            <option value="'Times New Roman', serif">Times</option>
+          </select>
+        </div>
+        <div class="grid-2">
+          <div><label class="label">Taille (px)</label><input id="inpFontSize" type="number" min="8" max="48" value="14" class="input"></div>
+          <div><label class="label">Interligne</label><input id="inpLineHeight" type="number" min="0.9" max="2" step="0.05" value="1.2" class="input"></div>
+        </div>
+        <div class="grid-2">
+          <div><label class="label">Couleur texte</label><input id="inpColor" type="color" value="#0b1220" class="input"></div>
+          <div><label class="label">Arrière-plan</label><input id="inpBg" type="color" value="#ffffff" class="input"></div>
+        </div>
+        <div class="grid-2">
+          <div><label class="label">Rayon (px)</label><input id="inpRadius" type="number" min="0" max="48" value="10" class="input"></div>
+          <div><label class="label">Ombre</label>
+            <select id="inpShadow" class="input"><option value="none">Aucune</option><option value="sm">Légère</option><option value="md">Moyenne</option><option value="lg">Forte</option></select>
+          </div>
+        </div>
+        <div class="grid-4">
+          <div><label class="label">X</label><input id="inpX" type="number" class="input"></div>
+          <div><label class="label">Y</label><input id="inpY" type="number" class="input"></div>
+          <div><label class="label">Larg.</label><input id="inpW" type="number" class="input"></div>
+          <div><label class="label">Haut.</label><input id="inpH" type="number" class="input"></div>
+        </div>
+        <div class="row gap">
+          <button id="btnDuplicate" class="btn">Dupliquer</button>
+          <button id="btnDelete" class="btn">Supprimer</button>
+          <button id="btnLock" class="btn">Verrouiller</button>
+          <button id="btnHide" class="btn">Masquer</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div id="topToolbar" class="toolbar floating hidden">
+    <button class="btn" id="tbBold"><b>B</b></button>
+    <button class="btn" id="tbItal"><i>I</i></button>
+    <button class="btn" id="tbDec">A-</button>
+    <button class="btn" id="tbInc">A+</button>
+    <button class="btn" id="tbAlignL">⟸</button>
+    <button class="btn" id="tbAlignC">⟺</button>
+    <button class="btn" id="tbAlignR">⟹</button>
+    <button class="btn" id="tbAI">IA…</button>
+  </div>
+
+  <footer id="statusBar" class="statusbar">
+    <div class="container row between">
+      <span id="statusText" class="muted">Prêt</span>
+      <span class="muted small">Ctrl/Cmd+Z Annuler · Ctrl/Cmd+D Dupliquer · Suppr Supprimer</span>
+    </div>
+  </footer>
+
+  <main class="main">
+    <div class="container">
+      <div class="canvas-scroll">
+        <div id="canvasWrap">
+          <div id="cvPage" class="page page-grid"></div>
+        </div>
+      </div>
+    </div>
+  
+  <dialog id="deleteDialog" class="panel p-4 text-sm" style="max-width:520px">
+    <h3 class="h3">Supprimer un bloc (Aperçu)</h3>
+    <div id="deleteList" class="space-y"></div>
+    <button id="btnCloseDelete" class="btn w-full" style="margin-top:10px">Fermer</button>
+  </dialog>
+</main>
+
+  <dialog id="exportDialog" class="panel p-4 text-sm">
+    <h3 class="h3">Exporter</h3>
+    <div class="space-y">
+      <button id="btnExportPNG" class="btn w-full">PNG (300dpi)</button>
+      <button id="btnExportPDF" class="btn w-full">PDF</button>
+      <button id="btnExportSVG" class="btn w-full">SVG</button>
+      <button id="btnExportDOCX" class="btn w-full">DOCX</button>
+      <button id="btnExportJSON" class="btn w-full">JSON (projet)</button>
+      <button id="btnPrint" class="btn w-full">Imprimer / PDF système</button>
+      <button id="btnCloseExport" class="btn w-full">Fermer</button>
+    </div>
+  </dialog>
+
+  <dialog id="templateDialog" class="panel p-4 text-sm"></dialog>
+
+  <dialog id="logDialog" class="panel p-4 text-sm" style="max-width:800px">
+    <h3 class="h3">Logs & Diagnostics</h3>
+    <div class="row gap">
+      <button id="btnRunDiag" class="btn">Lancer auto-diagnostic</button>
+      <button id="btnClearLogs" class="btn">Vider</button>
+      <button id="btnCopyLogs" class="btn">Copier</button>
+    </div>
+    <pre id="logOutput" style="white-space:pre-wrap;max-height:60vh;overflow:auto;background:#0b1220;color:#e5e7eb;padding:8px;border-radius:8px;margin-top:10px"></pre>
+    <button id="btnCloseLogs" class="btn w-full" style="margin-top:10px">Fermer</button>
+  </dialog>
+
+  <input type="file" id="fileImportJSON" accept=".json" class="hidden"/>
+
+  <script type="module">
+    import { initApp } from './js/app.js';
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(console.error); });
+    }
+    initApp();
+  </script>
+</body>
+</html>
