@@ -9,6 +9,8 @@ import { log, error, getLogs, clearLogs, attachGlobalErrorHandler } from './log.
 
 export function initApp(){
   attachGlobalErrorHandler();
+  
+  // Get all DOM elements with null checks
   const btnHamburger = document.getElementById('btnHamburger');
   const leftDrawer = document.getElementById('leftDrawer');
   const cvPage = document.getElementById('cvPage');
@@ -29,38 +31,125 @@ export function initApp(){
 
   log('app','Init start');
 
-  btnHamburger.addEventListener('click', ()=> { leftDrawer.classList.toggle('open'); log('ui','toggle drawer', { open:leftDrawer.classList.contains('open') }); });
-  createLibrary(blockLibrary, (type)=>{ const el = addBlockToCanvas(type, cvPage); selectBlock(el); pushHistory('Ajout bloc: '+type); log('block','added', { type }); });
-  for(const th of THEMES){ const b=document.createElement('button'); b.className='btn'; b.textContent=th.name; b.addEventListener('click', ()=>{ applyTheme(th); pushHistory('Thème: '+th.name); log('theme','apply', { name: th.name }); }); themeList.appendChild(b); }
-  initDragAndResize(cvPage, sel=> { refreshInspector(sel); log('drag','select', { id: sel?.dataset?.id }); });
-  initInspector(); initAIStudio(); initExport(); initState();
-  cvPage.addEventListener('click', onCanvasClick);
-  btnExport.addEventListener('click', ()=> { openExportDialog(); log('ui','open export'); });
-  btnPreview.addEventListener('click', ()=> { document.body.classList.toggle('preview'); const on=document.body.classList.contains('preview'); document.getElementById('statusText').textContent = on ? 'Aperçu (interactions désactivées)' : 'Édition'; log('ui','toggle preview', { preview:on }); });
-  btnPublish.addEventListener('click', ()=> { alert('Publiez via vos propres webhooks.'); log('ui','publish click'); });
-  btnTemplates.addEventListener('click', ()=> { loadTemplateDialog(); log('ui','open templates'); });
+  // Helper function to safely bind events
+  const bindEvent = (element, event, handler, elementName) => {
+    if(element) {
+      element.addEventListener(event, handler);
+    } else {
+      console.warn(`[App] missing element: ${elementName}`);
+    }
+  };
 
-  btnImportJSON.addEventListener('click', ()=> { fileImportJSON.click(); log('ui','import click'); });
-  fileImportJSON.addEventListener('change', async (e)=>{
+  bindEvent(btnHamburger, 'click', ()=> { 
+    if(leftDrawer) {
+      leftDrawer.classList.toggle('open'); 
+      log('ui','toggle drawer', { open:leftDrawer.classList.contains('open') }); 
+    }
+  }, 'btnHamburger');
+
+  if(blockLibrary && cvPage) {
+    createLibrary(blockLibrary, (type)=>{ 
+      const el = addBlockToCanvas(type, cvPage); 
+      selectBlock(el); 
+      pushHistory('Ajout bloc: '+type); 
+      log('block','added', { type }); 
+    });
+  } else {
+    console.warn('[App] missing blockLibrary or cvPage');
+  }
+
+  if(themeList) {
+    for(const th of THEMES){ 
+      const b=document.createElement('button'); 
+      b.className='btn'; 
+      b.textContent=th.name; 
+      b.addEventListener('click', ()=>{ 
+        applyTheme(th); 
+        pushHistory('Thème: '+th.name); 
+        log('theme','apply', { name: th.name }); 
+      }); 
+      themeList.appendChild(b); 
+    }
+  } else {
+    console.warn('[App] missing themeList');
+  }
+
+  if(cvPage) {
+    initDragAndResize(cvPage, sel=> { refreshInspector(sel); log('drag','select', { id: sel?.dataset?.id }); });
+    cvPage.addEventListener('click', onCanvasClick);
+  } else {
+    console.warn('[App] missing cvPage');
+  }
+
+  initInspector(); initAIStudio(); initExport(); initState();
+
+  bindEvent(btnExport, 'click', ()=> { openExportDialog(); log('ui','open export'); }, 'btnExport');
+  bindEvent(btnPreview, 'click', ()=> { 
+    document.body.classList.toggle('preview'); 
+    const on=document.body.classList.contains('preview'); 
+    const statusText = document.getElementById('statusText');
+    if(statusText) statusText.textContent = on ? 'Aperçu (interactions désactivées)' : 'Édition'; 
+    log('ui','toggle preview', { preview:on }); 
+  }, 'btnPreview');
+  bindEvent(btnPublish, 'click', ()=> { alert('Publiez via vos propres webhooks.'); log('ui','publish click'); }, 'btnPublish');
+  bindEvent(btnTemplates, 'click', ()=> { loadTemplateDialog(); log('ui','open templates'); }, 'btnTemplates');
+
+  bindEvent(btnImportJSON, 'click', ()=> { 
+    if(fileImportJSON) {
+      fileImportJSON.click(); 
+      log('ui','import click'); 
+    }
+  }, 'btnImportJSON');
+
+  bindEvent(fileImportJSON, 'change', async (e)=>{
     const f = e.target.files?.[0]; if(!f) return;
     const txt = await f.text();
-    try{ await newProject(cvPage, JSON.parse(txt)); pushHistory('Import JSON'); log('data','import ok'); }catch(err){ alert('JSON invalide'); error('data','import fail', { err: String(err) }); }
-  });
+    try{ 
+      if(cvPage) {
+        await newProject(cvPage, JSON.parse(txt)); 
+        pushHistory('Import JSON'); 
+        log('data','import ok'); 
+      }
+    }catch(err){ 
+      alert('JSON invalide'); 
+      error('data','import fail', { err: String(err) }); 
+    }
+  }, 'fileImportJSON');
 
   // Logs dialog
-  btnLogs.addEventListener('click', ()=> { logDialog.showModal(); log('ui','open logs'); renderLogs(); });
-  btnCloseLogs.addEventListener('click', ()=> logDialog.close());
-  btnClearLogs.addEventListener('click', ()=> { clearLogs(); renderLogs(); });
-  btnCopyLogs.addEventListener('click', async ()=> {
-    try{ await navigator.clipboard.writeText(document.getElementById('logOutput').textContent||''); log('logs','copied'); }catch(e){ error('logs','copy fail', { e:String(e) }); }
-  });
-  btnRunDiag.addEventListener('click', runDiagnostics);
+  bindEvent(btnLogs, 'click', ()=> { 
+    if(logDialog) {
+      logDialog.showModal(); 
+      log('ui','open logs'); 
+      renderLogs(); 
+    }
+  }, 'btnLogs');
+  bindEvent(btnCloseLogs, 'click', ()=> {
+    if(logDialog) logDialog.close();
+  }, 'btnCloseLogs');
+  bindEvent(btnClearLogs, 'click', ()=> { clearLogs(); renderLogs(); }, 'btnClearLogs');
+  bindEvent(btnCopyLogs, 'click', async ()=> {
+    try{ 
+      const logOutput = document.getElementById('logOutput');
+      if(logOutput) {
+        await navigator.clipboard.writeText(logOutput.textContent||''); 
+        log('logs','copied'); 
+      }
+    }catch(e){ 
+      error('logs','copy fail', { e:String(e) }); 
+    }
+  }, 'btnCopyLogs');
+  bindEvent(btnRunDiag, 'click', runDiagnostics, 'btnRunDiag');
 
   log('app','Init done');
 }
 
 function renderLogs(){
   const out = document.getElementById('logOutput');
+  if(!out) {
+    console.warn('[App] missing logOutput element');
+    return;
+  }
   const items = getLogs();
   out.textContent = items.map(l => `${l.t}  [${l.level}]  ${l.scope} :: ${l.message}${l.data? ' ' + JSON.stringify(l.data): ''}`).join('\n');
 }

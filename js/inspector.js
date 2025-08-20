@@ -16,34 +16,94 @@ export function initInspector(){
 }
 
 export function refreshInspector(sel){
-  const info=document.getElementById('inspectorSel'); if(!info){ console.warn('[Inspector] missing inspectorSel'); return; } if(!sel){ info.textContent='Aucun bloc'; return; }
+  const info=document.getElementById('inspectorSel'); 
+  if(!info){ 
+    console.warn('[Inspector] missing inspectorSel'); 
+    return; 
+  } 
+  if(!sel){ 
+    info.textContent='Aucun bloc'; 
+    return; 
+  }
   info.textContent = sel.dataset.type+' • '+(sel.dataset.id||'');
   const content=sel.querySelector('.block-content')||sel;
   const get=(el,prop,def)=> window.getComputedStyle(el)[prop] || def;
-  $('#inpFont').value = get(sel,'fontFamily',"Inter, system-ui, Arial");
-  $('#inpFontSize').value = parseInt(get(content,'fontSize',14));
-  $('#inpLineHeight').value = parseFloat(get(sel,'lineHeight',1.2));
-  $('#inpColor').value = rgbToHex(get(content,'color','#0b1220'));
-  $('#inpBg').value = rgbToHex(get(sel,'backgroundColor','#ffffff'));
-  $('#inpRadius').value = parseInt(get(sel,'borderRadius',10));
-  $('#inpShadow').value = (get(sel,'boxShadow','none')==='none')?'none':'md';
-  $('#inpX').value = parseInt(sel.style.left||0);
-  $('#inpY').value = parseInt(sel.style.top||0);
-  $('#inpW').value = parseInt(sel.style.width||sel.offsetWidth);
-  $('#inpH').value = parseInt(sel.style.height||sel.offsetHeight);
+  
+  // Add null checks for all input elements
+  const inpFont = $('#inpFont');
+  if(inpFont) inpFont.value = get(sel,'fontFamily',"Inter, system-ui, Arial");
+  
+  const inpFontSize = $('#inpFontSize');
+  if(inpFontSize) inpFontSize.value = parseInt(get(content,'fontSize',14));
+  
+  const inpLineHeight = $('#inpLineHeight');
+  if(inpLineHeight) inpLineHeight.value = parseFloat(get(sel,'lineHeight',1.2));
+  
+  const inpColor = $('#inpColor');
+  if(inpColor) inpColor.value = rgbToHex(get(content,'color','#0b1220'));
+  
+  const inpBg = $('#inpBg');
+  if(inpBg) inpBg.value = rgbToHex(get(sel,'backgroundColor','#ffffff'));
+  
+  const inpRadius = $('#inpRadius');
+  if(inpRadius) inpRadius.value = parseInt(get(sel,'borderRadius',10));
+  
+  const inpShadow = $('#inpShadow');
+  if(inpShadow) inpShadow.value = (get(sel,'boxShadow','none')==='none')?'none':'md';
+  
+  const inpX = $('#inpX');
+  if(inpX) inpX.value = parseInt(sel.style.left||0);
+  
+  const inpY = $('#inpY');
+  if(inpY) inpY.value = parseInt(sel.style.top||0);
+  
+  const inpW = $('#inpW');
+  if(inpW) inpW.value = parseInt(sel.style.width||sel.offsetWidth);
+  
+  const inpH = $('#inpH');
+  if(inpH) inpH.value = parseInt(sel.style.height||sel.offsetHeight);
 }
 export function inspectorApplyValue(){
   const sel=getSel(); if(!sel) return;
   const content=sel.querySelector('.block-content')||sel;
-  sel.style.fontFamily=$('#inpFont').value;
-  content.style.fontSize=$('#inpFontSize').value+'px';
-  sel.style.lineHeight=$('#inpLineHeight').value;
-  content.style.color=$('#inpColor').value;
-  sel.style.background=$('#inpBg').value;
-  sel.style.borderRadius=$('#inpRadius').value+'px';
-  const sh=$('#inpShadow').value; sel.style.boxShadow = sh==='none'?'none':'0 6px 16px rgba(0,0,0,.12)';
-  sel.style.left=$('#inpX').value+'px'; sel.style.top=$('#inpY').value+'px';
-  sel.style.width=$('#inpW').value+'px'; sel.style.height=$('#inpH').value+'px';
+  
+  // Add null checks for all input elements
+  const inpFont = $('#inpFont');
+  if(inpFont) sel.style.fontFamily = inpFont.value;
+  
+  const inpFontSize = $('#inpFontSize');
+  if(inpFontSize) content.style.fontSize = inpFontSize.value+'px';
+  
+  const inpLineHeight = $('#inpLineHeight');
+  if(inpLineHeight) sel.style.lineHeight = inpLineHeight.value;
+  
+  const inpColor = $('#inpColor');
+  if(inpColor) content.style.color = inpColor.value;
+  
+  const inpBg = $('#inpBg');
+  if(inpBg) sel.style.background = inpBg.value;
+  
+  const inpRadius = $('#inpRadius');
+  if(inpRadius) sel.style.borderRadius = inpRadius.value+'px';
+  
+  const inpShadow = $('#inpShadow');
+  if(inpShadow) {
+    const sh = inpShadow.value; 
+    sel.style.boxShadow = sh==='none'?'none':'0 6px 16px rgba(0,0,0,.12)';
+  }
+  
+  const inpX = $('#inpX');
+  if(inpX) sel.style.left = inpX.value+'px';
+  
+  const inpY = $('#inpY');
+  if(inpY) sel.style.top = inpY.value+'px';
+  
+  const inpW = $('#inpW');
+  if(inpW) sel.style.width = inpW.value+'px';
+  
+  const inpH = $('#inpH');
+  if(inpH) sel.style.height = inpH.value+'px';
+  
   saveToStorage(); pushHistory('Modifs Inspecteur'); log('inspector','apply values', { id:sel.dataset.id });
 }
 function getSel(){ return document.querySelector('.drag-block.selected'); }

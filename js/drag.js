@@ -22,7 +22,14 @@ export function onCanvasClick(e){ if(e.target.id==='cvPage') selectBlock(null); 
 
 function showToolbarFor(el){
   const tb = document.getElementById('topToolbar');
-  if(!el){ tb.classList.add('hidden'); return; }
+  if(!tb) {
+    console.warn('[Drag] missing topToolbar element');
+    return;
+  }
+  if(!el){ 
+    tb.classList.add('hidden'); 
+    return; 
+  }
   const rect = el.getBoundingClientRect();
   tb.style.left = (rect.left + rect.width/2 - 160) + 'px';
   tb.style.top = Math.max(56, rect.top - 46) + 'px';
@@ -99,14 +106,26 @@ export function initDragAndResize(page, onSelect){
 
   // Toolbar actions
   const q=id=>document.getElementById(id);
-  q('tbBold').addEventListener('click', ()=> document.execCommand('bold'));
-  q('tbItal').addEventListener('click', ()=> document.execCommand('italic'));
-  q('tbInc').addEventListener('click', ()=> fontDelta(1));
-  q('tbDec').addEventListener('click', ()=> fontDelta(-1));
-  q('tbAlignL').addEventListener('click', ()=> document.execCommand('justifyLeft'));
-  q('tbAlignC').addEventListener('click', ()=> document.execCommand('justifyCenter'));
-  q('tbAlignR').addEventListener('click', ()=> document.execCommand('justifyRight'));
-  q('tbAI').addEventListener('click', ()=> document.getElementById('leftDrawer').classList.add('open'));
+  const bindToolbar = (id, fn) => {
+    const el = q(id);
+    if(el) {
+      el.addEventListener('click', fn);
+    } else {
+      console.warn('[Drag] missing toolbar element:', id);
+    }
+  };
+  
+  bindToolbar('tbBold', ()=> document.execCommand('bold'));
+  bindToolbar('tbItal', ()=> document.execCommand('italic'));
+  bindToolbar('tbInc', ()=> fontDelta(1));
+  bindToolbar('tbDec', ()=> fontDelta(-1));
+  bindToolbar('tbAlignL', ()=> document.execCommand('justifyLeft'));
+  bindToolbar('tbAlignC', ()=> document.execCommand('justifyCenter'));
+  bindToolbar('tbAlignR', ()=> document.execCommand('justifyRight'));
+  bindToolbar('tbAI', ()=> {
+    const drawer = document.getElementById('leftDrawer');
+    if(drawer) drawer.classList.add('open');
+  });
 
   // Keyboard shortcuts
   window.addEventListener('keydown', (e)=>{
@@ -143,17 +162,30 @@ function fontDelta(delta){
     if(e.key==='Delete' || e.key==='Backspace'){
       if(document.body.classList.contains('preview')){
         e.preventDefault();
-        const dlg=document.getElementById('deleteDialog'); const list=document.getElementById('deleteList');
-        if(!dlg || !list) return;
+        const dlg=document.getElementById('deleteDialog'); 
+        const list=document.getElementById('deleteList');
+        if(!dlg || !list) {
+          console.warn('[Drag] missing delete dialog elements');
+          return;
+        }
         const blocks=[...document.querySelectorAll('#cvPage .drag-block')];
         list.innerHTML = blocks.map(b=>`<div class="row between"><span>${b.dataset.type||'bloc'} • ${b.dataset.id||''}</span><button class="btn" data-id="${b.dataset.id}">Supprimer</button></div>`).join('');
         dlg.showModal();
         list.querySelectorAll('button[data-id]').forEach(btn=> btn.addEventListener('click', ()=>{
-          const id=btn.getAttribute('data-id'); const el=document.querySelector('.drag-block[data-id="'+id+'"]').remove();
-          document.getElementById('btnCloseDelete').click();
+          const id=btn.getAttribute('data-id'); 
+          const el=document.querySelector('.drag-block[data-id="'+id+'"]');
+          if(el) el.remove();
+          const closeBtn = document.getElementById('btnCloseDelete');
+          if(closeBtn) closeBtn.click();
         }));
       }
     }
   });
-  const closeBtn = document.getElementById('btnCloseDelete'); if(closeBtn){ closeBtn.addEventListener('click', ()=> document.getElementById('deleteDialog').close()); }
+  const closeBtn = document.getElementById('btnCloseDelete'); 
+  if(closeBtn){ 
+    closeBtn.addEventListener('click', ()=> {
+      const dlg = document.getElementById('deleteDialog');
+      if(dlg) dlg.close();
+    }); 
+  }
 })();
